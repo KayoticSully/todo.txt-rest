@@ -1,4 +1,4 @@
 {
-	"GET /" : "index"
-  , "GET /" : "index"
+	"GET /:file": "index",
+	"GET /:file/:item": "index"
 }

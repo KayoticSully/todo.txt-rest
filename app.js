@@ -1,12 +1,14 @@
-var express = require('express');
-var http = require('http');
-var path = require('path');
-var favicon = require('static-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var routes = require('express-json-routes');
+/// imports
+var express = require('express'),
+    http = require('http'),
+    path = require('path'),
+    favicon = require('static-favicon'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    routes = require('express-json-routes');
 
+/// app variables
 var app = express();
 
 // view engine setup
@@ -22,7 +24,24 @@ app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
+app.param(function(name, fn) {
+    if (fn instanceof RegExp) {
+        return function(req, res, next, val) {
+            var captures;
+            if (captures = fn.exec(String(val))) {
+                req.params[name] = captures;
+                next();
+            } else {
+                next('route');
+            }
+        }
+    }
+});
+
+
+
 routes(app);
+app.param('item', /^\d+$/);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
@@ -52,6 +71,5 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
 
 module.exports = app;
