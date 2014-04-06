@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 /// Module dependencies.
 var express = require('express'),
@@ -10,6 +10,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     routes = require('./routes');
 
+/// app variables
 var app = express();
 
 // view engine setup
@@ -25,7 +26,22 @@ app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /// Load Routes
+app.param(function(name, fn) {
+    if (fn instanceof RegExp) {
+        return function(req, res, next, val) {
+            var captures;
+            if (captures = fn.exec(String(val))) {
+                req.params[name] = captures;
+                next();
+            } else {
+                next('route');
+            }
+        };
+    }
+});
+
 routes(app);
+app.param('item', /^\d+$/);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
@@ -55,6 +71,5 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
 
 module.exports = app;

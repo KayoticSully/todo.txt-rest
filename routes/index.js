@@ -1,18 +1,17 @@
-'use-strict';
+'use strict';
 
 /* GET home page. */
-
-var fs = require('fs')
+var fs = require('fs');
 
 module.exports = function(app) {
 	var files = fs.readdirSync('./routes');
 
-	for (file in files) {
+	for (var file in files) {
 		if (files.hasOwnProperty(file)) {
 
 		}
 	}
-}
+};
 
 /*
 var express = require('express'),
