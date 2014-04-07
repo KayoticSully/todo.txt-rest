@@ -1,0 +1,5 @@
+{
+	"enviornment": "development",
+	"port": 3000,
+	"routes": "/routes"
+}

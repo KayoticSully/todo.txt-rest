@@ -1,4 +1,0 @@
-{
-	"GET /:file": "index",
-	"GET /:file/:item": "index"
-}

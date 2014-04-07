@@ -1,25 +1,24 @@
 'use strict';
 
-/* GET home page. */
-var fs = require('fs');
+/**
+ * Module dependencies
+ */
+var express = require('express');
 
-module.exports = function(app) {
-	var files = fs.readdirSync('./routes');
+/**
+ * Module Routes
+ */
+var Index = module.exports = express.Router(),
+	base_route = '/';
 
-	for (var file in files) {
-		if (files.hasOwnProperty(file)) {
+// GET Web
+Index.get(base_route, home);
 
-		}
-	}
-};
-
-/*
-var express = require('express'),
-	index = express.Router();
-
-index.get('/', function(req, res, next) {
+/**
+ * Functions
+ */
+function home(req, res) {
 	res.render('index', {
-		title: 'Express'
+		title: 'Todo.txt API'
 	});
-})
-*/
+}
