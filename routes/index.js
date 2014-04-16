@@ -8,9 +8,9 @@ var express = require('express');
 /**
  * Module Routes
  */
-var Index = module.exports = express.Router(),
-	base_route = '/';
+var Index = module.exports = express.Router();
 
+var base_route = '/';
 // GET Web
 Index.get(base_route, home);
 

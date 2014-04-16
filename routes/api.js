@@ -3,7 +3,8 @@
 /**
  * Module dependencies
  */
-var express = require('express');
+var express = require('express'),
+	exec = require('child_process').exec;
 
 /**
  * Module Routes
@@ -11,37 +12,37 @@ var express = require('express');
 var API = module.exports = express.Router();
 
 var base_route = '/api';
-// GET Todo's
-API.get(base_route, notImplemented);
-// POST Todo's
+// GET - List Todo Files
+API.get(base_route, ListTodoFiles);
+// POST - Create Todo File
 API.post(base_route, notImplemented);
-// PUT Todo's
+// PUT - Replace All Todo Files
 API.put(base_route, notImplemented);
-// DELETE Todo's
+// DELETE Delete All Todo Files
 API.delete(base_route, notImplemented);
 
 var resource_route = base_route + '/:file';
-// GET Todo's
+// GET - List Tasks in :file
 API.get(resource_route, notImplemented);
-// POST Todo's
+// POST - Add Task in :file
 API.post(resource_route, notImplemented);
-// PUT Todo's
+// PUT - Replace :file
 API.put(resource_route, notImplemented);
-// DELETE Todo's
+// DELETE - Delete :file
 API.delete(resource_route, notImplemented);
 
 var item_route = resource_route + '/:line';
-// GET Todo's
+// GET - Todo Item
 API.get(item_route, notImplemented);
-// POST Todo's
+// POST - Do Todo Item
 API.post(item_route, notImplemented);
-// PUT Todo's
+// PUT - Replace Todo Item
 API.put(item_route, notImplemented);
-// DELETE Todo's
+// DELETE - delete Todo Item
 API.delete(item_route, notImplemented);
 
 var filter_route = resource_route + '/:filter';
-// GET Todo's by filter
+// GET - Todo Items limited by :filter
 API.get(filter_route, notImplemented);
 
 /**
@@ -50,5 +51,11 @@ API.get(filter_route, notImplemented);
 function notImplemented(req, res) {
 	res.send({
 		'implemented': false
+	});
+}
+
+function ListTodoFiles(req, res) {
+	exec('todo.sh -p listfile', function(error, stdout, stderr) {
+		res.send('<pre>' + stdout + '</pre>');
 	});
 }
