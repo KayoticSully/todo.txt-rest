@@ -4,14 +4,15 @@
  * Module dependencies
  */
 var express = require('express'),
-	exec = require('child_process').exec;
+	path = require('path'),
+	todo = require(path.join(process.cwd(), 'todo.js'));
 
 /**
  * Module Routes
  */
 var API = module.exports = express.Router();
 
-var base_route = '/api';
+var base_route = '/api.:format?';
 // GET - List Todo Files
 API.get(base_route, ListTodoFiles);
 // POST - Create Todo File
@@ -55,7 +56,7 @@ function notImplemented(req, res) {
 }
 
 function ListTodoFiles(req, res) {
-	exec('todo.sh -p listfile', function(error, stdout, stderr) {
-		res.send('<pre>' + stdout + '</pre>');
+	todo.list_files(function(err, response) {
+		res.render(response);
 	});
 }

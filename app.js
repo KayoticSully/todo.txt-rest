@@ -6,8 +6,9 @@ var express = require('express'),
     path = require('path'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
-    config = require('./config/app.json'),
-    routes = require('./routes');
+    config = require(path.join(process.cwd(), 'config/app.json')),
+    routes = require(path.join(process.cwd(), 'routes.js')),
+    filter = require(path.join(process.cwd(), 'filter.js'));
 
 /**
  * app variables
@@ -28,6 +29,8 @@ app.set('view engine', 'ejs');
 app.use(bodyParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(filter.json);
+app.use(filter.txt);
 
 
 /**

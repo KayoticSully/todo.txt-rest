@@ -29,3 +29,4 @@ config/*.json
 
 #libsrc folder
 libsrc
+data
