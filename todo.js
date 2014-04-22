@@ -63,6 +63,7 @@ exports.list = function(list_file, query, callback) {
 
 	var list_param = '',
 		suffix = '.txt';
+
 	if (list_file) {
 		if (!endsWith(list_file, suffix)) {
 			list_file += suffix;
@@ -73,6 +74,10 @@ exports.list = function(list_file, query, callback) {
 
 	var command = 'list ' + list_param + ' ' + query;
 	todo(command, function(error, result) {
+		// remove extraneous elements
+		result.pop();
+		result.pop();
+
 		callback(error, result);
 	});
 };

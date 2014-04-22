@@ -14,14 +14,14 @@ shift
 if [ "$1" == "-s" ]; then
 
 	# sanitize input
-	TXT = "$2"
-	if [ "$TXT" != *.txt ]; then
-		TXT = "$2.txt"
+	TXT="$2"
+	if [[ ! "$TXT" == *.txt ]]; then
+		TXT="$2.txt"
 	fi
-	
-    export TODO_FILE="$TODO_DIR/$TXT"
+
+    TODO_FILE="$TODO_DIR/$TXT"
     shift
     shift
 fi
 
-"$TODO_SH" command list "$@"
+_list $TODO_FILE "$@"
