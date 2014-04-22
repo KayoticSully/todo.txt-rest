@@ -1,5 +1,4 @@
 'use strict';
-
 /**
  * Module dependencies
  */
@@ -18,7 +17,5 @@ Index.get(base_route, home);
  * Functions
  */
 function home(req, res) {
-	res.render('index', {
-		title: 'Todo.txt API'
-	});
+	res.sendfile('views/index.html');
 }

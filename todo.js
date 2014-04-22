@@ -1,5 +1,3 @@
-'use strict';
-
 var exec = require('child_process').exec,
 	util = require('util'),
 	path = require('path'),
@@ -13,6 +11,7 @@ var exec = require('child_process').exec,
  * Runs todo command and logs any errors
  */
 function todo(cmd_args, callback) {
+	'use strict';
 
 	// standardize input
 	if (!util.isArray(cmd_args)) {
@@ -28,21 +27,60 @@ function todo(cmd_args, callback) {
 			error = true;
 		}
 
-		callback(error, stdout);
+		var line_arr = stdout.trim().split('\n');
+		callback(error, line_arr);
 	});
 }
 
 
-exports.list_files = function(callback) {
-	todo('listfile', function(error, result) {
-		var line_arr = result.trim().split('\n');
-		line_arr.splice(0, 1);
-		callback(error, line_arr);
-	});
-};
+exports.listfile = function(callback) {
+	'use strict';
 
-exports.add = function(task, callback) {
-	todo('add ' + task, function(error, result) {
+	todo('listfile', function(error, result) {
+		result.splice(0, 1);
+
 		callback(error, result);
 	});
 };
+
+exports.make = function(file_name, callback) {
+	'use strict';
+
+	var suffix = '.txt';
+	if (file_name && endsWith(file_name, suffix)) {
+		var arr = file_name.split('.');
+		arr.pop();
+		file_name = arr.join('.');
+	}
+
+	todo('make ' + file_name, function(error, result) {
+		callback(error, result);
+	});
+};
+
+exports.list = function(list_file, query, callback) {
+	'use strict';
+
+	var list_param = '',
+		suffix = '.txt';
+	if (list_file) {
+		if (!endsWith(list_file, suffix)) {
+			list_file += suffix;
+		}
+
+		list_param = '-s ' + list_file;
+	}
+
+	var command = 'list ' + list_param + ' ' + query;
+	todo(command, function(error, result) {
+		callback(error, result);
+	});
+};
+
+/**
+ * Utility Functions
+ */
+function endsWith(str, suffix) {
+	'use strict';
+	return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}

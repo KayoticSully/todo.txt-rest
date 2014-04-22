@@ -1,5 +1,3 @@
-'use strict';
-
 /// Module dependencies.
 var express = require('express'),
     favicon = require('static-favicon'),
@@ -7,8 +5,7 @@ var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     config = require(path.join(process.cwd(), 'config/app.json')),
-    routes = require(path.join(process.cwd(), 'routes.js')),
-    filter = require(path.join(process.cwd(), 'filter.js'));
+    routes = require(path.join(process.cwd(), 'routes.js'));
 
 /**
  * app variables
@@ -29,8 +26,6 @@ app.set('view engine', 'ejs');
 app.use(bodyParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(filter.json);
-app.use(filter.txt);
 
 
 /**
@@ -44,6 +39,7 @@ routes(app, config);
 if (!module.parent) {
     // kick off the server!
     app.listen(app.get('port'), function() {
+        'use strict';
         console.log('Express server listening on port ' + app.get('port'));
     });
 }

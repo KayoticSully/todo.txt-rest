@@ -1,0 +1,27 @@
+#!/bin/bash
+
+action=$1
+shift
+
+[ "$action" = "usage" ] && {
+  echo "  Customized list:"
+  echo "    list tasks from a specific todo.txt file in TODO_DIR"
+  echo "    list [-s LIST_NAME] [QUERY]"
+  echo ""
+  exit
+}
+
+if [ "$1" == "-s" ]; then
+
+	# sanitize input
+	TXT = "$2"
+	if [ "$TXT" != *.txt ]; then
+		TXT = "$2.txt"
+	fi
+	
+    export TODO_FILE="$TODO_DIR/$TXT"
+    shift
+    shift
+fi
+
+"$TODO_SH" command list "$@"

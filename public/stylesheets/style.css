@@ -5,3 +5,6 @@ body {
 a {
   color: #00b7ff;
 }
+ember-application {
+  margin: 20px;
+}
