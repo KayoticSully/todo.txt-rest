@@ -3,8 +3,8 @@
 'use strict';
 
 var debug = require('debug')('todo-txt-rest'),
-	app = require('../app'),
-	config = require('../config/app');
+	app = require('../app/server.js'),
+	config = require('../config/app.json');
 
 /**
  * Application Enviornment

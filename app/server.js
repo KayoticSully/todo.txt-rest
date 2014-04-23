@@ -5,7 +5,7 @@ var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     config = require(path.join(process.cwd(), 'config/app.json')),
-    routes = require(path.join(process.cwd(), 'app/routes.js'));
+    routes = require(path.join(process.cwd(), 'routes.js'));
 
 /**
  * app variables
