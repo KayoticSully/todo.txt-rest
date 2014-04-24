@@ -1,7 +1,8 @@
 var should = require('should'),
   config = require('../config/test.json'),
   server = require('../bin/todo.txt-server'),
-  request = require('./lib/SuperSimpleRequest.js')(config);
+  request = require('./lib/SuperSimpleRequest.js')(config),
+  path = require('path');
 
 describe('Todo.txt API Test', function() {
   'use strict';
@@ -18,12 +19,12 @@ describe('Todo.txt API Test', function() {
     fs.unlink('/home/rsullivan/Git/todo.txt-server/data/test.txt');
   });
 
-  describe('#file', function() {
+  describe('#files', function() {
 
-    var path = '/api';
+    var uri = '/api';
 
-    it('should get list', function(done) {
-      request.get(path, function(error, payload) {
+    it('should get files', function(done) {
+      request.get(uri, function(error, payload) {
         should.not.exist(error);
 
         payload.should.have.property('files');
@@ -33,12 +34,12 @@ describe('Todo.txt API Test', function() {
       });
     });
 
-    it('should create', function(done) {
+    it('should create file', function(done) {
       var params = {
         file_name: 'test'
       };
 
-      request.post(path, params, function(error, payload) {
+      request.post(uri, params, function(error, payload) {
         should.not.exist(error);
 
         // validate schema
@@ -64,7 +65,7 @@ describe('Todo.txt API Test', function() {
     it('should not create', function(done) {
       var params = {};
 
-      request.post(path, params, function(error, payload) {
+      request.post(uri, params, function(error, payload) {
         should.not.exist(error);
 
         // validate schema
@@ -87,12 +88,11 @@ describe('Todo.txt API Test', function() {
   });
 
   describe('#task', function() {
-
-    var path = '/api/todo';
-    var line_number = 0;
+    var uri = '/api/todo';
+    var task_number = 0;
 
     it('should get list', function(done) {
-      request.get(path, function(error, payload) {
+      request.get(uri, function(error, payload) {
         should.not.exist(error);
 
         payload.should.have.property('tasks');
@@ -107,7 +107,7 @@ describe('Todo.txt API Test', function() {
         task: 'Test Task @test +testing'
       };
 
-      request.post(path, params, function(error, payload) {
+      request.post(uri, params, function(error, payload) {
         should.not.exist(error);
 
         // validate schema
@@ -126,7 +126,7 @@ describe('Todo.txt API Test', function() {
         payload.task.text.should.equal(params.task);
         payload.task.line_number.should.be.greaterThan(0);
 
-        line_number = payload.task.line_number;
+        task_number = payload.task.line_number;
 
         done();
       });
@@ -135,7 +135,7 @@ describe('Todo.txt API Test', function() {
     it('should not create a task', function(done) {
       var params = {};
 
-      request.post(path, params, function(error, payload) {
+      request.post(uri, params, function(error, payload) {
         should.not.exist(error);
 
         // validate schema
@@ -154,30 +154,28 @@ describe('Todo.txt API Test', function() {
 
     it('should update a task', function(done) {
       var params = {
-        line_number: line_number,
         task: 'Test2 Task2 @test +testing',
       };
 
-      request.put(path, params, function(error, payload) {
+      var task_uri = path.join(uri, String(task_number));
+
+      request.put(task_uri, params, function(error, payload) {
         should.not.exist(error);
 
         // validate schema
         payload.should.have.property('task');
         payload.task.should.have.property('updated');
         payload.task.should.have.property('text');
-        payload.task.should.have.property('line_number');
         payload.task.should.have.property('old_text');
 
         // validate types
         payload.task.updated.should.be.a.Boolean;
         payload.task.text.should.be.a.String;
-        payload.task.line_number.should.be.a.Number;
         payload.task.old_text.should.be.a.String;
 
         // validate content
         payload.task.updated.should.be.true;
         payload.task.text.should.equal(params.task);
-        payload.task.line_number.should.equal(params.line_number);
         payload.task.old_text.should.not.equal(params.task);
 
         done();

@@ -139,13 +139,12 @@ function update_task(req, res) {
 	'use strict';
 
 	var list_name = req.params.file,
-		line = req.params.line_number,
+		line = req.params.line,
 		new_text = req.body.task;
 
 
 	var task = {
 		updated: false,
-		line_number: line,
 		text: new_text
 	};
 
