@@ -29,7 +29,7 @@ API.get(resource_route, list_tasks);
 // POST - Add Task in :file
 API.post(resource_route, create_task);
 // PUT - Replace :file
-API.put(resource_route, update_task);
+API.put(resource_route, not_implemented);
 // DELETE - Delete :file
 API.delete(resource_route, not_implemented);
 
@@ -39,7 +39,7 @@ API.get(item_route, not_implemented);
 // POST - Do Todo Item
 API.post(item_route, not_implemented);
 // PUT - Replace Todo Item
-API.put(item_route, not_implemented);
+API.put(item_route, update_task);
 // DELETE - delete Todo Item
 API.delete(item_route, not_implemented);
 
@@ -102,7 +102,7 @@ function list_tasks(req, res) {
 	// no validation needed for file route would
 	// not get here if it did not exist
 	var list_name = req.params.file;
-	todo.listfrom(list_name, '', function(err, response) {
+	todo.list(list_name, '', function(err, response) {
 		res.render('tasks', response);
 	});
 }
@@ -119,7 +119,7 @@ function create_task(req, res) {
 	};
 
 	if (text) {
-		todo.addto(list_name, text, function(err, response) {
+		todo.add(list_name, text, function(err, response) {
 
 			var task_arr = response.split(' '),
 				line_number = task_arr[0];
@@ -139,8 +139,8 @@ function update_task(req, res) {
 	'use strict';
 
 	var list_name = req.params.file,
-		new_text = req.body.task,
-		line = req.body.line_number;
+		line = req.params.line_number,
+		new_text = req.body.task;
 
 
 	var task = {
@@ -149,7 +149,7 @@ function update_task(req, res) {
 		text: new_text
 	};
 
-	if (new_text && line) {
+	if (new_text) {
 		todo.replace(list_name, line, new_text, function(err, response) {
 			var old_text_arr = response[0].split(' ');
 

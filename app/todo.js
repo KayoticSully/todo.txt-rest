@@ -1,6 +1,8 @@
-var exec = require('child_process').exec,
+var _ = require('underscore'),
+	exec = require('child_process').exec,
 	util = require('util'),
 	path = require('path'),
+	app_config = require(path.join(process.cwd(), 'config/app.json')),
 	// Locations
 	todo_script = path.join(process.cwd(), 'lib/todo.sh'),
 	todo_cfg = path.join(process.cwd(), 'config/todo.cfg'),
@@ -8,10 +10,35 @@ var exec = require('child_process').exec,
 	global_args = ['-p', '-d ' + todo_cfg];
 
 /**
+ * Variable Setup
+ */
+var options = {
+	env: {
+		TODO_DIR: app_config.todo_data,
+		TODO_FILE: path.join(app_config.todo_data, 'todo.txt')
+	}
+};
+
+/**
  * Runs todo command and logs any errors
  */
-function todo(cmd_args, callback) {
+function todo(cmd_args, settings, callback) {
 	'use strict';
+
+	var script_options = _.clone(options);
+
+	// Apply settings
+	if (_.isFunction(settings)) {
+		callback = settings;
+	} else if (_.isObject(options)) {
+		if (settings.TODO_DIR) {
+			script_options.env.TODO_DIR = settings.TODO_DIR;
+		}
+
+		if (settings.TODO_FILE) {
+			script_options.env.TODO_FILE = path.join(script_options.env.TODO_DIR, settings.TODO_FILE);
+		}
+	}
 
 	// standardize input
 	if (!util.isArray(cmd_args)) {
@@ -20,7 +47,7 @@ function todo(cmd_args, callback) {
 
 	// build final arg list
 	var args = global_args.concat(cmd_args).join(' ');
-	exec(todo_script + ' ' + args, function(error, stdout) {
+	exec(todo_script + ' ' + args, script_options, function(error, stdout) {
 		if (error) {
 			console.log(error);
 			// dont leak error messages
@@ -32,7 +59,9 @@ function todo(cmd_args, callback) {
 	});
 }
 
-
+/**
+ * Todo Actions
+ */
 exports.listfile = function(callback) {
 	'use strict';
 
@@ -58,13 +87,15 @@ exports.make = function(file_name, callback) {
 	});
 };
 
-exports.listfrom = function(list_file, query, callback) {
+exports.list = function(list_file, query, callback) {
 	'use strict';
 
-	list_file = dest_name(list_file);
+	var options = {
+		TODO_FILE: dest_name(list_file)
+	};
 
-	var command = 'listfrom ' + list_file + ' ' + query;
-	todo(command, function(error, result) {
+	var command = 'list ' + query;
+	todo(command, options, function(error, result) {
 		// remove extraneous elements
 		result.pop();
 		result.pop();
@@ -73,13 +104,15 @@ exports.listfrom = function(list_file, query, callback) {
 	});
 };
 
-exports.addto = function(list_file, task, callback) {
+exports.add = function(list_file, task, callback) {
 	'use strict';
 
-	list_file = dest_name(list_file);
+	var options = {
+		TODO_FILE: dest_name(list_file)
+	};
 
-	var command = 'addto ' + list_file + ' ' + task;
-	todo(command, function(error, result) {
+	var command = 'add ' + task;
+	todo(command, options, function(error, result) {
 		callback(error, result[0]);
 	});
 };
@@ -87,10 +120,12 @@ exports.addto = function(list_file, task, callback) {
 exports.replace = function(list_file, line, task, callback) {
 	'use strict';
 
-	list_file = dest_name(list_file);
+	var options = {
+		TODO_FILE: dest_name(list_file)
+	};
 
-	var command = 'replacein ' + list_file + ' ' + line + ' ' + task;
-	todo(command, function(error, result) {
+	var command = 'replace ' + line + ' ' + task;
+	todo(command, options, function(error, result) {
 		callback(error, result);
 	});
 };
