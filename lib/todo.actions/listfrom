@@ -4,19 +4,19 @@ action=$1
 shift
 
 [ "$action" = "usage" ] && {
-  echo "  Customized list:"
+  echo "  Customized listfrom:"
   echo "    list tasks from a specific todo.txt file in TODO_DIR"
   echo "    list [-s LIST_NAME] [QUERY]"
   echo ""
   exit
 }
 
-if [ "$1" == "-s" ]; then
+if [ "$1" ]; then
 
 	# sanitize input
-	TXT="$2"
+	TXT="$1"
 	if [[ ! "$TXT" == *.txt ]]; then
-		TXT="$2.txt"
+		TXT="$1.txt"
 	fi
 
     TODO_FILE="$TODO_DIR/$TXT"

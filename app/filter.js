@@ -1,7 +1,7 @@
 module.exports = function(req, res, next) {
 	'use strict';
 
-	res.render = function(payload) {
+	res.render = function(name, payload) {
 
 		res.format({
 			text: function() {
@@ -13,7 +13,9 @@ module.exports = function(req, res, next) {
 			},
 
 			json: function() {
-				res.json(payload);
+				var response = {};
+				response[name] = payload;
+				res.json(response);
 			}
 		});
 	};

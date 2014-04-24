@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+var debug = require('debug')('todo-txt-rest'),
+	app = require('../app'),
+	config = require('../config/app.json'),
+	server = null;
+
+/**
+ * Exports
+ */
+module.exports.start = start;
+module.exports.stop = stop;
+
+/**
+ * Application Enviornment
+ */
+// Enviornment Variables
+app.settings.env = process.env.NODE_ENV || config.environment;
+app.set('port', process.env.PORT || config.port);
+
+if (!module.parent) {
+	start();
+}
+
+
+/**
+ * Functions
+ */
+function start(port) {
+	'use strict';
+	var server_port = port || app.get('port');
+
+	server = app.listen(server_port, function() {
+		debug('Express server listening on port ' + server.address().port);
+	});
+}
+
+function stop() {
+	'use strict';
+	server.close();
+}

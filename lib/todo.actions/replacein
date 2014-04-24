@@ -1,0 +1,27 @@
+#!/bin/bash
+
+action=$1
+shift
+
+[ "$action" = "usage" ] && {
+  echo "  replacein:"
+  echo "    replace tasks in specific file"
+  echo "    replacein DEST LINE# NEW_TASK"
+  echo ""
+  exit
+}
+
+if [ "$1" ]; then
+
+	# sanitize input
+	TXT="$1"
+	if [[ ! "$TXT" == *.txt ]]; then
+		TXT="$1.txt"
+	fi
+
+    TODO_FILE="$TODO_DIR/$TXT"
+    shift
+    shift
+fi
+
+replaceOrPrepend 'replace' "$@"

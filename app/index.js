@@ -5,7 +5,7 @@ var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     config = require(path.join(process.cwd(), 'config/app.json')),
-    routes = require(path.join(process.cwd(), 'routes.js'));
+    routes = require(path.join(process.cwd(), 'app/routes.js'));
 
 /**
  * app variables
@@ -32,14 +32,3 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Load Routes
  */
 routes(app, config);
-
-/**
- * Start App
- */
-if (!module.parent) {
-    // kick off the server!
-    app.listen(app.get('port'), function() {
-        'use strict';
-        console.log('Express server listening on port ' + app.get('port'));
-    });
-}

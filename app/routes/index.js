@@ -17,5 +17,5 @@ Index.get(base_route, home);
  * Functions
  */
 function home(req, res) {
-	res.sendfile('views/index.html');
+	res.sendfile('app/views/index.html');
 }

@@ -54,30 +54,43 @@ exports.make = function(file_name, callback) {
 	}
 
 	todo('make ' + file_name, function(error, result) {
-		callback(error, result);
+		callback(error, result[0]);
 	});
 };
 
-exports.list = function(list_file, query, callback) {
+exports.listfrom = function(list_file, query, callback) {
 	'use strict';
 
-	var list_param = '',
-		suffix = '.txt';
+	list_file = dest_name(list_file);
 
-	if (list_file) {
-		if (!endsWith(list_file, suffix)) {
-			list_file += suffix;
-		}
-
-		list_param = '-s ' + list_file;
-	}
-
-	var command = 'list ' + list_param + ' ' + query;
+	var command = 'listfrom ' + list_file + ' ' + query;
 	todo(command, function(error, result) {
 		// remove extraneous elements
 		result.pop();
 		result.pop();
 
+		callback(error, result);
+	});
+};
+
+exports.addto = function(list_file, task, callback) {
+	'use strict';
+
+	list_file = dest_name(list_file);
+
+	var command = 'addto ' + list_file + ' ' + task;
+	todo(command, function(error, result) {
+		callback(error, result[0]);
+	});
+};
+
+exports.replace = function(list_file, line, task, callback) {
+	'use strict';
+
+	list_file = dest_name(list_file);
+
+	var command = 'replacein ' + list_file + ' ' + line + ' ' + task;
+	todo(command, function(error, result) {
 		callback(error, result);
 	});
 };
@@ -88,4 +101,16 @@ exports.list = function(list_file, query, callback) {
 function endsWith(str, suffix) {
 	'use strict';
 	return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+function dest_name(dest) {
+	'use strict';
+
+	var suffix = '.txt';
+
+	if (dest && !endsWith(dest, suffix)) {
+		dest += suffix;
+	}
+
+	return dest;
 }
