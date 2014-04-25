@@ -3,8 +3,10 @@
  */
 var express = require('express'),
 	path = require('path'),
+	fs = require('fs'),
 	todo = require(path.join(process.cwd(), 'app/todo.js')),
-	filter = require(path.join(process.cwd(), 'app/filter.js'));
+	filter = require(path.join(process.cwd(), 'app/filter.js')),
+	config = require(path.join(process.cwd(), 'config/app.json'));
 
 /**
  * Module Routes
@@ -29,7 +31,7 @@ API.get(resource_route, list_tasks);
 // POST - Add Task in :file
 API.post(resource_route, create_task);
 // PUT - Replace :file
-API.put(resource_route, not_implemented);
+API.put(resource_route, replace_file); // Next
 // DELETE - Delete :file
 API.delete(resource_route, not_implemented);
 
@@ -63,6 +65,32 @@ function list_todo_files(req, res) {
 
 	todo.listfile(function(err, response) {
 		res.render('files', response);
+	});
+}
+
+function replace_file(req, res) {
+	'use strict';
+
+	var file = {
+		replaced: false
+	};
+
+	console.log(req.files);
+
+	fs.readFile(req.files.todo_file.path, function(err, data) {
+		if (!err) {
+			var newPath = path.join(config.todo_data, req.params.file);
+			fs.writeFile(newPath, data, function(err) {
+				if (!err) {
+					file.replaced = true;
+					res.render('file', file);
+				} else {
+					res.render('file', file);
+				}
+			});
+		} else {
+			res.render('file', file);
+		}
 	});
 }
 

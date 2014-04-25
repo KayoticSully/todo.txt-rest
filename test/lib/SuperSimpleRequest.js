@@ -4,7 +4,8 @@
 require('should');
 
 var _ = require('underscore'),
-	http = require('http');
+	http = require('http'),
+	fs = require('fs');
 
 module.exports = function(config) {
 	'use strict';
@@ -26,10 +27,19 @@ module.exports = function(config) {
 			var body = JSON.stringify(payload);
 			req.write(body);
 			req.end();
+		},
+		putFile: function(path, filePath, callback) {
+			var req = request('putfile', path, callback);
+
+			var stream = fs.createReadStream(filePath);
+			stream.pipe(req);
+
+			req.end();
 		}
 	};
 
 	function request(method, path, callback) {
+
 		var options = build_options(method, path);
 
 		return http.request(options, function(response) {
@@ -52,7 +62,6 @@ module.exports = function(config) {
 	}
 
 	function build_options(method, path) {
-
 		var options = _.clone(config);
 
 		options.path = path;

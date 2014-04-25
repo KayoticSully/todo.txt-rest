@@ -182,5 +182,17 @@ describe('Todo.txt API Test', function() {
       });
     });
 
+    it('should replace list', function(done) {
+      var filePath = path.join(process.cwd(), 'test/res/replacement_todo_list.txt');
+
+      request.putFile(uri, filePath, function(error, payload) {
+        should.not.exist(error);
+
+        console.log(payload);
+
+        done();
+      });
+    });
+
   });
 });
