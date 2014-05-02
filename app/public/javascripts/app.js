@@ -4,9 +4,14 @@ App.Router.map(function() {
 	// put your routes here
 });
 
-App.IndexRoute = Ember.Route.extend({
-	model: function() {
+App.FileRoute = Ember.Route.extend({
+	model: function(params) {
 		'use strict';
-		return ['red', 'yellow', 'blue'];
+		return this.store.find('file', params.file_id);
 	}
+});
+
+App.FileAdapter = DS.RESTAdapter.extend({
+	namespace: 'api/v2',
+	host: 'https://api.example2.com'
 });

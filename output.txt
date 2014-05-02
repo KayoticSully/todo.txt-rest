@@ -1,0 +1,14 @@
+
+> todo.txt-rest@0.0.1 test /home/rsullivan/Git/todo.txt-server
+> node_modules/mocha/bin/mocha
+
+
+  [90mGET /api [32m200 [90m16ms - 28b[0m
+[31m․[0m[90mPOST /api [31m500 [90m7ms - 7.21kb[0m
+[31m․[0m[90mPOST /api [31m500 [90m3ms - 7.21kb[0m
+[31m․[0m[90mGET /api/todo [32m200 [90m25ms - 1.01kb[0m
+[31m․[0m[90mPOST /api/todo [31m500 [90m2ms - 7.98kb[0m
+[31m․[0m[31m․[0m[31m․[0m[31m․[0m
+
+[92m [0m[32m 0 passing[0m[90m (6s)[0m
+

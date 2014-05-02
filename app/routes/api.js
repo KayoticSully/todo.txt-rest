@@ -1,12 +1,18 @@
 /**
  * Module dependencies
  */
-var express = require('express'),
+var _ = require('underscore'),
+	express = require('express'),
 	path = require('path'),
-	fs = require('fs'),
+	todo_util = require(path.join(process.cwd(), 'app/utils.js')),
 	todo = require(path.join(process.cwd(), 'app/todo.js')),
 	filter = require(path.join(process.cwd(), 'app/filter.js')),
 	config = require(path.join(process.cwd(), 'config/app.json'));
+
+// Integrate Unserscore.string
+_.str = require('underscore.string');
+_.mixin(_.str.exports());
+_.str.include('Underscore.string', 'string');
 
 /**
  * Module Routes
@@ -31,19 +37,19 @@ API.get(resource_route, list_tasks);
 // POST - Add Task in :file
 API.post(resource_route, create_task);
 // PUT - Replace :file
-API.put(resource_route, replace_file); // Next
+API.put(resource_route, replace_file);
 // DELETE - Delete :file
-API.delete(resource_route, not_implemented);
+API.delete(resource_route, delete_file);
 
 var item_route = resource_route + '/:line';
 // GET - Todo Item
-API.get(item_route, not_implemented);
+API.get(item_route, get_task);
 // POST - Do Todo Item
-API.post(item_route, not_implemented);
+API.post(item_route, do_task);
 // PUT - Replace Todo Item
 API.put(item_route, update_task);
 // DELETE - delete Todo Item
-API.delete(item_route, not_implemented);
+API.delete(item_route, delete_task);
 
 var filter_route = resource_route + '/:filter';
 // GET - Todo Items limited by :filter
@@ -72,25 +78,39 @@ function replace_file(req, res) {
 	'use strict';
 
 	var file = {
+		name: req.params.file,
 		replaced: false
 	};
 
-	console.log(req.files);
+	var todos = req.body.todos;
+	var filePath = path.join(config.todo_data, todo_util.dest_name(req.params.file));
 
-	fs.readFile(req.files.todo_file.path, function(err, data) {
-		if (!err) {
-			var newPath = path.join(config.todo_data, req.params.file);
-			fs.writeFile(newPath, data, function(err) {
-				if (!err) {
-					file.replaced = true;
-					res.render('file', file);
-				} else {
-					res.render('file', file);
-				}
-			});
-		} else {
-			res.render('file', file);
+	todo.replace_file(filePath, todos, function(error, buffer) {
+		if (!error) {
+			file.contents = buffer;
+			file.replaced = true;
 		}
+
+		res.render('file', file);
+	});
+}
+
+function delete_file(req, res) {
+	'use strict';
+
+	var file = {
+		name: req.params.file,
+		deleted: false
+	};
+
+	var filePath = path.join(config.todo_data, todo_util.dest_name(req.params.file));
+
+	todo.delete_file(filePath, function(error) {
+		if (!error) {
+			file.deleted = true;
+		}
+
+		res.render('file', file);
 	});
 }
 
@@ -191,4 +211,77 @@ function update_task(req, res) {
 	} else {
 		res.render('task', task);
 	}
+}
+
+function get_task(req, res) {
+	'use strict';
+
+	var list_name = req.params.file,
+		line = req.params.line;
+
+	var task = {
+		text: null
+	};
+
+	todo.list(list_name, '', function(error, tasks) {
+		if (!error) {
+			var filtered_tasks = _.filter(tasks, function(task) {
+				return _.startsWith(task, line);
+			});
+
+			var selected_task = filtered_tasks[0],
+				task_arr = selected_task.split(' ');
+
+			task.line_number = parseInt(task_arr.shift());
+			task.text = task_arr.join(' ');
+		}
+
+		res.render('task', task);
+	});
+}
+
+function do_task(req, res) {
+	'use strict';
+
+	var list_name = req.params.file,
+		line = req.params.line;
+
+	var task = {
+		text: null
+	};
+
+	todo.complete(list_name, line, function(error, result) {
+		if (!error) {
+			var task_arr = result.split(' ');
+
+			task.line_number = parseInt(task_arr.shift());
+			task.text = task_arr.join(' ');
+		}
+
+		res.render('task', task);
+	});
+}
+
+function delete_task(req, res) {
+	'use strict';
+
+	var list_name = req.params.file,
+		line = req.params.line;
+
+	var task = {
+		text: null,
+		deleted: false
+	};
+
+	todo.del(list_name, line, function(error, result) {
+		if (!error) {
+			var task_arr = result.split(' ');
+
+			task.line_number = parseInt(task_arr.shift());
+			task.text = task_arr.join(' ');
+			task.deleted = true;
+		}
+
+		res.render('task', task);
+	});
 }

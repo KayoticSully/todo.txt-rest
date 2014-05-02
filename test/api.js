@@ -152,6 +152,29 @@ describe('Todo.txt API Test', function() {
       });
     });
 
+    it('should get a task', function(done) {
+      var task_uri = path.join(uri, String(task_number));
+
+      request.get(task_uri, function(error, payload) {
+        should.not.exist(error);
+
+        // validate schema
+        payload.should.have.property('task');
+        payload.task.should.have.property('line_number');
+        payload.task.should.have.property('text');
+
+        // validate types
+        payload.task.text.should.be.a.String;
+        payload.task.line_number.should.be.a.Number;
+
+        // validate content
+        payload.task.text.should.equal('Test Task @test +testing');
+        payload.task.line_number.should.equal(task_number);
+
+        done();
+      });
+    });
+
     it('should update a task', function(done) {
       var params = {
         task: 'Test2 Task2 @test +testing',
@@ -182,17 +205,111 @@ describe('Todo.txt API Test', function() {
       });
     });
 
-    it('should replace list', function(done) {
-      var filePath = path.join(process.cwd(), 'test/res/replacement_todo_list.txt');
+    it('should do a task', function(done) {
+      var params = {},
+        task_uri = path.join(uri, String(task_number));
 
-      request.putFile(uri, filePath, function(error, payload) {
+      request.post(task_uri, params, function(error, payload) {
         should.not.exist(error);
 
-        console.log(payload);
+        // validate schema
+        payload.should.have.property('task');
+        payload.task.should.have.property('line_number');
+        payload.task.should.have.property('text');
+
+        // validate types
+        payload.task.text.should.be.a.String;
+        payload.task.line_number.should.be.a.Number;
+
+        // validate content
+        payload.task.text.should.match(/^x (19|20)\d\d[-|.](0[1-9]|1[012])[-|.](0[1-9]|[12][0-9]|3[01]) Test2 Task2 @test \+testing/);
+        payload.task.line_number.should.equal(task_number);
 
         done();
       });
     });
 
+    it('should delete a task', function(done) {
+      var task_uri = path.join(uri, '1');
+
+      var params = {
+        task: 'Test2 Task2 @test +testing',
+      };
+
+      request.post(uri, params, function(error) {
+        should.not.exist(error);
+
+        request.del(task_uri, function(error, payload) {
+          should.not.exist(error);
+
+          // validate schema
+          payload.should.have.property('task');
+          payload.task.should.have.property('line_number');
+          payload.task.should.have.property('text');
+          payload.task.should.have.property('deleted');
+
+          // validate types
+          payload.task.text.should.be.a.String;
+          payload.task.line_number.should.be.a.Number;
+          payload.task.deleted.should.be.a.Boolean;
+
+          // validate content
+          payload.task.text.should.equal('Test2 Task2 @test +testing');
+          payload.task.line_number.should.equal(1);
+          payload.task.deleted.should.equal(true);
+
+          done();
+        });
+      });
+    });
+
+    it('should replace list', function(done) {
+      var params = {
+        todos: ['test', 'testing +test @test']
+      };
+
+      request.put(uri, params, function(error, payload) {
+        should.not.exist(error);
+
+        // schema
+        payload.should.have.property('file');
+        payload.file.should.have.property('name');
+        payload.file.should.have.property('replaced');
+        payload.file.should.have.property('contents');
+
+        // types
+        payload.file.name.should.be.a.String;
+        payload.file.replaced.should.be.a.Boolean;
+        payload.file.contents.should.be.a.String;
+
+        // validate data
+        payload.file.name.should.equal('todo');
+        payload.file.replaced.should.equal(true);
+        payload.file.contents.should.equal('test\ntesting +test @test\n');
+
+        done();
+      });
+    });
+
+    it('should delete list', function(done) {
+      request.del(uri, function(error, payload) {
+        should.not.exist(error);
+
+        // schema
+        payload.should.have.property('file');
+        payload.file.should.have.property('deleted');
+        payload.file.should.have.property('name');
+
+        // types
+        payload.file.name.should.be.a.String;
+        payload.file.deleted.should.be.a.Boolean;
+
+        // validate data
+        payload.file.name.should.equal('todo');
+        payload.file.deleted.should.equal(true);
+
+        done();
+      });
+    });
   });
 });

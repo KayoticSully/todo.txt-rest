@@ -4,8 +4,7 @@
 require('should');
 
 var _ = require('underscore'),
-	http = require('http'),
-	fs = require('fs');
+	http = require('http');
 
 module.exports = function(config) {
 	'use strict';
@@ -28,25 +27,33 @@ module.exports = function(config) {
 			req.write(body);
 			req.end();
 		},
-		putFile: function(path, filePath, callback) {
-			var req = request('putfile', path, callback);
+		del: function(path, callback) {
+			var options = {
+				'headers': {
+					'Accept': 'application/json'
+				}
+			};
 
-			var stream = fs.createReadStream(filePath);
-			stream.pipe(req);
-
-			req.end();
+			request('delete', path, options, callback).end();
 		}
 	};
 
-	function request(method, path, callback) {
+	function request(method, path, overrides, callback) {
 
 		var options = build_options(method, path);
+
+		if (_.isFunction(overrides)) {
+			callback = overrides;
+		} else if (_.isObject(overrides)) {
+			_.extend(options, overrides);
+		}
 
 		return http.request(options, function(response) {
 			var body = '';
 
 			response.should.be.json;
 			response.on('data', storeData).on('end', done);
+
 
 			function storeData(chunk) {
 				body += chunk;

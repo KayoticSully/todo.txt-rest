@@ -2,6 +2,8 @@ var _ = require('underscore'),
 	exec = require('child_process').exec,
 	util = require('util'),
 	path = require('path'),
+	fs = require('fs'),
+	todo_util = require(path.join(process.cwd(), 'app/utils.js')),
 	app_config = require(path.join(process.cwd(), 'config/app.json')),
 	// Locations
 	todo_script = path.join(process.cwd(), 'lib/todo.sh'),
@@ -22,13 +24,15 @@ var options = {
 /**
  * Runs todo command and logs any errors
  */
-function todo(cmd_args, settings, callback) {
+function todo(cmd_args, settings, autoYes, callback) {
 	'use strict';
 
 	var script_options = _.clone(options);
 
 	// Apply settings
-	if (_.isFunction(settings)) {
+	if (_.isFunction(autoYes)) {
+		callback = autoYes;
+	} else if (_.isFunction(settings)) {
 		callback = settings;
 	} else if (_.isObject(options)) {
 		if (settings.TODO_DIR) {
@@ -47,7 +51,13 @@ function todo(cmd_args, settings, callback) {
 
 	// build final arg list
 	var args = global_args.concat(cmd_args).join(' ');
-	exec(todo_script + ' ' + args, script_options, function(error, stdout) {
+
+	var pipe = '';
+	if (autoYes) {
+		pipe = 'echo y | ';
+	}
+
+	exec(pipe + todo_script + ' ' + args, script_options, function(error, stdout) {
 		if (error) {
 			console.log(error);
 			// dont leak error messages
@@ -76,7 +86,7 @@ exports.make = function(file_name, callback) {
 	'use strict';
 
 	var suffix = '.txt';
-	if (file_name && endsWith(file_name, suffix)) {
+	if (file_name && todo_util.endsWith(file_name, suffix)) {
 		var arr = file_name.split('.');
 		arr.pop();
 		file_name = arr.join('.');
@@ -91,7 +101,7 @@ exports.list = function(list_file, query, callback) {
 	'use strict';
 
 	var options = {
-		TODO_FILE: dest_name(list_file)
+		TODO_FILE: todo_util.dest_name(list_file)
 	};
 
 	var command = 'list ' + query;
@@ -108,7 +118,7 @@ exports.add = function(list_file, task, callback) {
 	'use strict';
 
 	var options = {
-		TODO_FILE: dest_name(list_file)
+		TODO_FILE: todo_util.dest_name(list_file)
 	};
 
 	var command = 'add ' + task;
@@ -121,7 +131,7 @@ exports.replace = function(list_file, line, task, callback) {
 	'use strict';
 
 	var options = {
-		TODO_FILE: dest_name(list_file)
+		TODO_FILE: todo_util.dest_name(list_file)
 	};
 
 	var command = 'replace ' + line + ' ' + task;
@@ -130,22 +140,66 @@ exports.replace = function(list_file, line, task, callback) {
 	});
 };
 
-/**
- * Utility Functions
- */
-function endsWith(str, suffix) {
-	'use strict';
-	return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
-
-function dest_name(dest) {
+exports.replace_file = function(path, task_array, callback) {
 	'use strict';
 
-	var suffix = '.txt';
+	fs.exists(path, function(exists) {
+		if (exists) {
+			// remove file
+			fs.unlinkSync(path);
 
-	if (dest && !endsWith(dest, suffix)) {
-		dest += suffix;
-	}
+			var buffer = '';
+			for (var i in task_array) {
+				if (!_.isNaN(i)) {
+					buffer += task_array[i] + '\n';
+				}
+			}
 
-	return dest;
-}
+			fs.writeFile(path, buffer, function(error) {
+				callback(error, buffer);
+			});
+		} else {
+			callback('file does not exist', null);
+		}
+	});
+};
+
+exports.delete_file = function(path, callback) {
+	'use strict';
+	fs.exists(path, function(exists) {
+		if (exists) {
+			// remove file
+			fs.unlink(path, function(error) {
+				callback(error);
+			});
+		} else {
+			callback('file does not exist');
+		}
+	});
+};
+
+exports.complete = function(list_file, line_number, callback) {
+	'use strict';
+
+	var options = {
+		TODO_FILE: todo_util.dest_name(list_file)
+	};
+
+	var command = 'do ' + line_number;
+	todo(command, options, function(error, result) {
+		callback(error, result[0]);
+	});
+};
+
+exports.del = function(list_file, line_number, callback) {
+	'use strict';
+
+	var options = {
+		TODO_FILE: todo_util.dest_name(list_file)
+	};
+
+	var command = 'del ' + line_number;
+	todo(command, options, true, function(error, result) {
+		callback(error, result[1]);
+	});
+};
